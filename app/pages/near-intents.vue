@@ -163,6 +163,50 @@
             />
           </div>
         </div>
+
+        <!-- Send Deposit Button -->
+        <div class="pt-3 border-t">
+          <UButton
+            color="primary"
+            size="lg"
+            block
+            :loading="sendingDeposit"
+            :disabled="transactionHash !== null"
+            @click="handleSendDeposit"
+          >
+            {{ transactionHash ? 'Deposit Sent ✓' : (sendingDeposit ? 'Sending...' : 'Send Deposit') }}
+          </UButton>
+        </div>
+      </div>
+    </UCard>
+
+    <!-- Transaction Success -->
+    <UCard v-if="transactionHash" class="mb-6 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+      <div class="space-y-3">
+        <div class="flex items-start gap-2">
+          <UIcon name="i-heroicons-check-circle" class="text-green-600 text-xl mt-0.5" />
+          <div class="flex-1">
+            <h4 class="font-semibold text-green-900 dark:text-green-100 mb-1">Transaction Submitted</h4>
+            <p class="text-sm text-green-800 dark:text-green-200 mb-2">
+              Your XRP deposit has been sent successfully!
+            </p>
+            <div class="flex items-center gap-2">
+              <code class="text-xs bg-white dark:bg-gray-900 px-2 py-1 rounded border border-green-200 dark:border-green-800">
+                {{ transactionHash }}
+              </code>
+              <UButton
+                size="xs"
+                color="green"
+                variant="soft"
+                icon="i-heroicons-arrow-top-right-on-square"
+                :to="transactionExplorerUrl"
+                target="_blank"
+              >
+                View
+              </UButton>
+            </div>
+          </div>
+        </div>
       </div>
     </UCard>
 
@@ -265,8 +309,11 @@
 const amount = ref('0.5')
 const recipientAddress = ref('')
 const loading = ref(false)
+const sendingDeposit = ref(false)
 const error = ref('')
 const quoteResult = ref<any>(null)
+const transactionHash = ref<string | null>(null)
+const transactionExplorerUrl = ref<string>('')
 const showFromModal = ref(false)
 const showToModal = ref(false)
 
@@ -294,6 +341,7 @@ const selectFrom = (option: any) => {
   fromToken.value = option.token
   showFromModal.value = false
   quoteResult.value = null
+  transactionHash.value = null
 }
 
 const selectTo = (option: any) => {
@@ -301,12 +349,14 @@ const selectTo = (option: any) => {
   toToken.value = option.token
   showToModal.value = false
   quoteResult.value = null
+  transactionHash.value = null
 }
 
 const handleGetQuote = async () => {
   loading.value = true
   error.value = ''
   quoteResult.value = null
+  transactionHash.value = null
 
   try {
     const response = await $fetch('/api/near/quote', {
@@ -323,6 +373,36 @@ const handleGetQuote = async () => {
     console.error('Error getting quote:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const handleSendDeposit = async () => {
+  if (!quoteResult.value?.quote?.depositAddress) {
+    error.value = 'No deposit address available'
+    return
+  }
+
+  sendingDeposit.value = true
+  error.value = ''
+
+  try {
+    const response = await $fetch('/api/near/send-deposit', {
+      method: 'POST',
+      body: {
+        depositAddress: quoteResult.value.quote.depositAddress,
+        amount: amount.value,
+      },
+    })
+
+    if (response.success) {
+      transactionHash.value = response.hash
+      transactionExplorerUrl.value = response.explorerUrl
+    }
+  } catch (err: any) {
+    error.value = err.data?.message || err.message || 'Failed to send deposit'
+    console.error('Error sending deposit:', err)
+  } finally {
+    sendingDeposit.value = false
   }
 }
 
