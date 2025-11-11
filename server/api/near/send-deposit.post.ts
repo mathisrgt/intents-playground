@@ -1,4 +1,4 @@
-import { xrpToDrops, Client, Wallet } from 'xrpl';
+import { xrpToDrops, Client, Wallet, Payment } from 'xrpl';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -30,11 +30,11 @@ export default defineEventHandler(async (event) => {
       const wallet = Wallet.fromSeed(runtimeConfig.xrplSeed);
 
       // Prepare payment transaction
-      const payment = {
+      const payment: Payment = {
         TransactionType: 'Payment',
         Account: wallet.address,
         Destination: depositAddress,
-        Amount: xrpToDrops(amount), // Convert XRP to drops
+        Amount: xrpToDrops(amount),
       };
 
       // Sign and submit transaction

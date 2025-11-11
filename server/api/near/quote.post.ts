@@ -23,6 +23,8 @@ export default defineEventHandler(async (event) => {
       smallestUnitAmount
     );
 
+    console.log('Quote received:', quote);
+
     return {
       success: true,
       quote: quote.quote,

@@ -2,7 +2,7 @@
   <UContainer class="py-12 min-h-screen max-w-2xl">
     <UButton
       icon="i-heroicons-arrow-left"
-      color="gray"
+    
       variant="ghost"
       @click="navigateTo('/')"
       class="mb-8"
@@ -142,21 +142,13 @@
           <span class="text-gray-600 dark:text-gray-400">Rate</span>
           <span class="font-medium">1 {{ fromToken.symbol }} ≈ {{ calculateRate() }} {{ toToken.symbol }}</span>
         </div>
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600 dark:text-gray-400">Protocol Fee</span>
-          <span class="font-medium">{{ quoteResult.quote.protocolFeeFormatted }}</span>
-        </div>
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600 dark:text-gray-400">Gas Fee</span>
-          <span class="font-medium">{{ quoteResult.quote.gasFeeFormatted }}</span>
-        </div>
         <div class="pt-3 border-t space-y-2">
           <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Deposit Address</div>
           <div class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <code class="text-xs flex-1 overflow-x-auto">{{ quoteResult.quote.depositAddress }}</code>
             <UButton
               size="xs"
-              color="gray"
+            
               variant="ghost"
               icon="i-heroicons-clipboard-document"
               @click="copyToClipboard(quoteResult.quote.depositAddress)"
@@ -196,7 +188,7 @@
               </code>
               <UButton
                 size="xs"
-                color="green"
+                color="primary"
                 variant="soft"
                 icon="i-heroicons-arrow-top-right-on-square"
                 :to="transactionExplorerUrl"
@@ -213,7 +205,7 @@
     <!-- Error -->
     <UAlert
       v-if="error"
-      color="red"
+      color="error"
       variant="soft"
       :title="error"
       @close="error = ''"
@@ -254,7 +246,7 @@
 
           <template #footer>
             <div class="flex justify-end">
-              <UButton variant="ghost" color="gray" @click="showFromModal = false">Close</UButton>
+              <UButton variant="ghost" @click="showFromModal = false">Close</UButton>
             </div>
           </template>
         </UCard>
@@ -296,7 +288,7 @@
 
           <template #footer>
             <div class="flex justify-end">
-              <UButton variant="ghost" color="gray" @click="showToModal = false">Close</UButton>
+              <UButton variant="ghost" @click="showToModal = false">Close</UButton>
             </div>
           </template>
         </UCard>
@@ -306,7 +298,7 @@
 </template>
 
 <script setup lang="ts">
-const amount = ref('0.5')
+const amount = ref('2')
 const recipientAddress = ref('')
 const loading = ref(false)
 const sendingDeposit = ref(false)
@@ -320,14 +312,14 @@ const showToModal = ref(false)
 const fromOptions = [
   {
     network: { label: 'XRPL', value: 'xrpl' },
-    token: { label: 'XRP', value: 'xrp', symbol: 'XRP', logo: 'xrp.png', assetId: 'nep141:xrp.omft.near' }
+    token: { label: 'XRP', value: 'xrp', symbol: 'XRP', logo: 'xrp.png' }
   }
 ]
 
 const toOptions = [
   {
     network: { label: 'Base', value: 'base' },
-    token: { label: 'USDC', value: 'usdc', symbol: 'USDC', logo: 'usdc.png', assetId: 'nep141:base-0x833589fcd6edb6e08f4c7c32d4f71b54bda02913.omft.near' }
+    token: { label: 'USDC', value: 'usdc', symbol: 'USDC', logo: 'usdc.png' }
   }
 ]
 
