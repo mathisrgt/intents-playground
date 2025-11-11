@@ -1,41 +1,26 @@
-import { xrpToDrops } from 'xrpl';
+import { Wallet, xrpToDrops } from 'xrpl';
 import { getQuote } from '../../controllers/near.controller';
+import { getTokenId } from '~~/server/constants/tokens';
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody(event);
-    const { recipientAddress, amount } = body;
-
-    if (!recipientAddress) {
-      throw createError({
-        statusCode: 400,
-        message: 'Recipient EVM address is required',
-      });
-    }
-
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      throw createError({
-        statusCode: 400,
-        message: 'Valid amount is required',
-      });
-    }
-
     const runtimeConfig = useRuntimeConfig();
-    const { Wallet } = await import('xrpl');
+    
+    const body = await readBody(event);
+    const { recipientAddress, smallestUnitAmount, originChain, originTokenName, destChain, destTokenName } = body;
 
     const senderAddress = Wallet.fromSeed(runtimeConfig.xrplSeed).address;
-    const originAsset = "nep141:xrp.omft.near"; // XRP on XRPL
-    const destinationAsset = "nep141:base-0x833589fcd6edb6e08f4c7c32d4f71b54bda02913.omft.near"; // USDC on Base
-
-    const amountInDrops = xrpToDrops(amount);
+    
+    const originAsset = getTokenId(originChain, originTokenName);
+    const destinationAsset = getTokenId(destChain, destTokenName);
 
     const quote = await getQuote(
-      false, // dry = false for actual quote with deposit address
+      false,
       senderAddress,
       recipientAddress,
       originAsset,
       destinationAsset,
-      amountInDrops
+      smallestUnitAmount
     );
 
     return {

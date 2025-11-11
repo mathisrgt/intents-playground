@@ -24,6 +24,7 @@
     <!-- Swap Card -->
     <UCard class="mb-6">
       <form @submit.prevent="handleGetQuote" class="space-y-6">
+        
         <!-- You pay -->
         <div class="space-y-3">
           <label class="text-sm font-medium text-gray-700 dark:text-gray-300">You pay</label>
@@ -41,12 +42,11 @@
             />
 
             <UButton
-              color="white"
+              color="neutral"
               variant="solid"
               size="xl"
               @click="showFromModal = true"
               :disabled="loading"
-              class="!px-4"
             >
               <img
                 :src="`/icons/${fromToken.logo}`"
@@ -83,7 +83,7 @@
             </div>
 
             <UButton
-              color="white"
+              color="neutral"
               variant="solid"
               size="xl"
               @click="showToModal = true"
@@ -359,11 +359,18 @@ const handleGetQuote = async () => {
   transactionHash.value = null
 
   try {
+    // Convert XRP to drops (1 XRP = 1,000,000 drops)
+    const amountInDrops = Math.floor(Number(amount.value) * 1_000_000).toString()
+
     const response = await $fetch('/api/near/quote', {
       method: 'POST',
       body: {
         recipientAddress: recipientAddress.value,
-        amount: amount.value,
+        smallestUnitAmount: amountInDrops,
+        originChain: fromNetwork.value.value,
+        originTokenName: fromToken.value.symbol,
+        destChain: toNetwork.value.value,
+        destTokenName: toToken.value.symbol,
       },
     })
 

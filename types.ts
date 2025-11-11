@@ -1,0 +1,1 @@
+export type supportedTokens = 'xrp' | 'usdc';
