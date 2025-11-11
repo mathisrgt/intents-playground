@@ -78,3 +78,28 @@ export async function getQuote(
     throw error;
   }
 }
+
+/**
+ * Check execution status of an intent
+ *
+ * This function checks the current status of a cross-chain swap intent
+ * Possible statuses: PENDING, SUCCESS, REFUNDED
+ */
+export async function getExecutionStatus(depositAddress: string) {
+  try {
+    // Initialize the API client
+    OpenAPI.BASE = 'https://1click.chaindefuser.com';
+
+    // Configure JWT token from runtime config
+    const runtimeConfig = useRuntimeConfig();
+    if (runtimeConfig.oneClickJwt) {
+      OpenAPI.TOKEN = runtimeConfig.oneClickJwt;
+    }
+
+    const status = await OneClickService.getExecutionStatus(depositAddress);
+    return status;
+  } catch (error) {
+    console.error('Error checking status:', error);
+    throw error;
+  }
+}

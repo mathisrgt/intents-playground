@@ -17,9 +17,13 @@ Chain abstraction solution powered by NEAR Protocol's 1click API.
 
 **Status:** ✅ Implemented
 **Features:**
-- Cross-chain swaps (XRP → USDC on Base)
-- Quote retrieval
-- Deposit address generation
+- Bi-directional cross-chain swaps:
+  - XRP (XRPL) → USDC (Base)
+  - USDC (Base) → XRP (XRPL)
+- Quote retrieval with automatic sender/recipient address generation
+- Automatic transaction submission (XRPL via xrpl.js, Base via viem)
+- Real-time balance display for both networks
+- Intent status tracking with progress visualization
 
 **Implementation:** `/app/pages/near-intents.vue`
 
@@ -89,6 +93,7 @@ Create a `.env` file in the root directory:
 ```bash
 # NEAR Intents (1click API)
 NUXT_XRPL_SEED=your_xrpl_wallet_seed
+NUXT_EVM_PRIVATE_KEY=your_evm_wallet_private_key
 NUXT_ONE_CLICK_JWT=your_1click_api_jwt
 
 # Future integrations
@@ -115,7 +120,8 @@ Navigate to `http://localhost:3000`
 - **Styling:** Tailwind CSS (via Nuxt UI)
 - **Blockchain Integrations:**
   - NEAR 1click SDK (Typescript)
-  - XRPL SDK
+  - XRPL SDK (xrpl.js)
+  - Viem (for EVM chains like Base)
   - Future: Across Protocol, 1inch APIs
 
 ## API Endpoints
@@ -123,13 +129,16 @@ Navigate to `http://localhost:3000`
 ### NEAR Intents
 
 #### POST `/api/near/quote`
-Get a quote for cross-chain swap.
+Get a quote for cross-chain swap. Automatically generates sender and recipient addresses from configured private keys/seeds.
 
 **Request:**
 ```json
 {
-  "recipientAddress": "0x...",
-  "amount": "0.5"
+  "smallestUnitAmount": "2000000",
+  "originChain": "xrpl",
+  "originTokenName": "XRP",
+  "destChain": "base",
+  "destTokenName": "USDC"
 }
 ```
 
@@ -138,15 +147,28 @@ Get a quote for cross-chain swap.
 {
   "success": true,
   "quote": {
-    "amountInFormatted": "0.5 XRP",
+    "amountInFormatted": "2.0 XRP",
     "amountOutFormatted": "1.234 USDC",
     "depositAddress": "r...",
     "protocolFeeFormatted": "0.001 XRP",
     "gasFeeFormatted": "0.0001 XRP"
   },
-  "senderAddress": "r..."
+  "senderAddress": "r...",
+  "recipientAddress": "0x..."
 }
 ```
+
+#### POST `/api/near/send-deposit`
+Send XRP deposit to intent address (XRPL).
+
+#### POST `/api/near/send-base-deposit`
+Send USDC deposit to intent address (Base).
+
+#### POST `/api/near/check-status`
+Check the execution status of an intent.
+
+#### GET `/api/near/balances`
+Fetch XRP and USDC balances for configured wallets.
 
 ## Roadmap
 
@@ -155,8 +177,10 @@ Get a quote for cross-chain swap.
 - [x] NEAR Intents integration
   - [x] Quote retrieval
   - [x] Token/network selection modal
-  - [ ] Transaction submission
-  - [ ] Status tracking
+  - [x] Bi-directional swaps (XRPL ↔ Base)
+  - [x] Transaction submission (both chains)
+  - [x] Status tracking with progress UI
+  - [x] Balance display with refresh
 - [ ] Across Protocol integration
   - [ ] Bridge quote
   - [ ] Relayer selection

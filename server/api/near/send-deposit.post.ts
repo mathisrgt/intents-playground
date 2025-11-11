@@ -3,7 +3,10 @@ import { xrpToDrops, Client, Wallet, Payment } from 'xrpl';
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
+    console.log('Received body:', JSON.stringify(body, null, 2));
     const { depositAddress, amount } = body;
+    console.log('depositAddress type:', typeof depositAddress, 'value:', depositAddress);
+    console.log('amount type:', typeof amount, 'value:', amount);
 
     if (!depositAddress) {
       throw createError({
