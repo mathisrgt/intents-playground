@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@1inch/cross-chain-sdk": "^1.1.1",
     "@defuse-protocol/one-click-sdk-typescript": "^0.1.1-0.2",
     "@near-js/tokens": "^2.5.1",
     "@nuxt/ui": "^4.1.0",

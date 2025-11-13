@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     xrplSeed: '',
     evmPrivateKey: '',
-    oneClickJwt: ''
+    oneClickJwt: '',
+    oneInchAuthKey: ''
   },
 })
