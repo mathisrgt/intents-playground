@@ -10,10 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@0xsquid/sdk": "^2.10.2",
+    "@0xsquid/squid-types": "^0.1.195",
     "@1inch/cross-chain-sdk": "^1.1.1",
     "@defuse-protocol/one-click-sdk-typescript": "^0.1.1-0.2",
     "@near-js/tokens": "^2.5.1",
     "@nuxt/ui": "^4.1.0",
+    "ethers": "^6.15.0",
     "nuxt": "^4.2.1",
     "typescript": "^5.9.3",
     "viem": "^2.38.6",

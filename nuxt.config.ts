@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     xrplSeed: '',
     evmPrivateKey: '',
     oneClickJwt: '',
-    oneInchAuthKey: ''
+    oneInchAuthKey: '',
+    squidIntegratorId: ''
   },
 })

@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
       <!-- Near Intents Card -->
       <UCard
         class="hover:scale-105 transition-transform cursor-pointer"
@@ -60,6 +60,24 @@
           <h3 class="text-2xl font-semibold">1inch Fusion</h3>
           <p class="text-gray-600 dark:text-gray-400">
             Gasless swaps with MEV protection
+          </p>
+        </div>
+      </UCard>
+
+      <!-- Squid Router Card -->
+      <UCard
+        class="hover:scale-105 transition-transform cursor-pointer"
+        @click="navigateTo('/squid')"
+      >
+        <div class="flex flex-col items-center text-center space-y-4 p-4">
+          <img
+            src="/icons/squid.jpg"
+            alt="Squid Router"
+            class="w-24 h-24 object-contain rounded-lg"
+          />
+          <h3 class="text-2xl font-semibold">Squid Router</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            XRPL cross-chain bridge
           </p>
         </div>
       </UCard>
