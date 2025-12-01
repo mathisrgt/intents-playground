@@ -139,8 +139,12 @@
             class="px-3 py-1 rounded-full text-sm font-medium"
             :class="getStatusClass()"
           >
-            {{ status || 'Pending' }}
+            {{ getStatusDisplay() }}
           </div>
+        </div>
+
+        <div v-if="lastUpdated" class="text-xs text-gray-500 dark:text-gray-400">
+          Last checked: {{ lastUpdated }}
         </div>
 
         <div class="space-y-2">
@@ -211,6 +215,7 @@ const error = ref('')
 const route = ref<any>(null)
 const txHash = ref<string | null>(null)
 const status = ref<string | null>(null)
+const lastUpdated = ref<string>('')
 const evmAddress = ref('')
 const xrplAddress = ref('')
 const requestId = ref('')
@@ -304,26 +309,58 @@ const handleExecute = async () => {
   }
 }
 
+let notFoundCount = 0
+const MAX_NOT_FOUND_RETRIES = 10
+
 const checkStatus = async () => {
   if (!txHash.value || !requestId.value) return
 
   try {
     const fromChainId = direction.value === 'toXRPL' ? '1440000' : 'xrpl-mainnet'
+    const toChainId = direction.value === 'toXRPL' ? 'xrpl-mainnet' : '1440000'
 
     const response = await $fetch('/api/squid/check-status', {
       method: 'POST',
       body: {
         transactionId: txHash.value,
         requestId: requestId.value,
+        fromChainId,
+        toChainId,
         quoteId: fromChainId
       }
     })
 
-    if (response.success && response.status) {
-      status.value = response.status.squidTransactionStatus
+    console.log('Status check response:', response)
 
-      if (['success', 'partial_success', 'needs_gas', 'not_found'].includes(status.value)) {
-        stopMonitoring()
+    if (response.success && response.status) {
+      const newStatus = response.status.squidTransactionStatus
+      console.log('Updating status from', status.value, 'to', newStatus)
+
+      // Handle not_found status specially
+      if (newStatus === 'not_found') {
+        notFoundCount++
+        console.log(`Transaction not found (attempt ${notFoundCount}/${MAX_NOT_FOUND_RETRIES})`)
+
+        if (notFoundCount >= MAX_NOT_FOUND_RETRIES) {
+          status.value = 'not_found'
+          lastUpdated.value = new Date().toLocaleTimeString()
+          console.log('Max not_found retries reached, stopping monitoring')
+          stopMonitoring()
+        } else {
+          // Keep showing "checking..." while transaction propagates
+          status.value = status.value || 'pending'
+          lastUpdated.value = new Date().toLocaleTimeString()
+        }
+      } else {
+        // Reset not found counter when we get a valid status
+        notFoundCount = 0
+        status.value = newStatus
+        lastUpdated.value = new Date().toLocaleTimeString()
+
+        if (['success', 'partial_success', 'needs_gas'].includes(status.value)) {
+          console.log('Status is final, stopping monitoring')
+          stopMonitoring()
+        }
       }
     }
   } catch (err) {
@@ -332,6 +369,7 @@ const checkStatus = async () => {
 }
 
 const startMonitoring = () => {
+  notFoundCount = 0 // Reset counter for new transaction
   checkStatus()
   statusInterval = setInterval(() => {
     checkStatus()
@@ -352,10 +390,18 @@ onUnmounted(() => {
 const getStatusClass = () => {
   if (status.value === 'success' || status.value === 'partial_success') {
     return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
-  } else if (status.value === 'needs_gas' || status.value === 'not_found') {
+  } else if (status.value === 'not_found') {
     return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+  } else if (status.value === 'needs_gas') {
+    return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200'
   }
-  return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200'
+  return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+}
+
+const getStatusDisplay = () => {
+  if (!status.value) return 'Checking...'
+  if (status.value === 'pending') return 'Pending...'
+  return status.value
 }
 
 useHead({

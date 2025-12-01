@@ -5,13 +5,13 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     console.log('Squid execute swap - Received body:', JSON.stringify(body, null, 2));
 
-    const { route, requestId, fromChainId } = body;
+    const { route } = body;
 
     // Validate required parameters
-    if (!route || !requestId || !fromChainId) {
+    if (!route) {
       throw createError({
         statusCode: 400,
-        message: 'Missing required parameters: route, requestId, fromChainId',
+        message: 'Missing required parameter: route',
       });
     }
 

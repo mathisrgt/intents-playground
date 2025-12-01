@@ -5,23 +5,23 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     console.log('Squid check status - Received body:', JSON.stringify(body, null, 2));
 
-    const { transactionId, requestId, fromChainId, quoteId, poll } = body;
+    const { transactionId, requestId, fromChainId, toChainId, quoteId, poll } = body;
 
     // Validate required parameters
-    if (!transactionId || !requestId || !fromChainId || !quoteId) {
+    if (!transactionId || !requestId || !fromChainId || !toChainId) {
       throw createError({
         statusCode: 400,
-        message: 'Missing required parameters: transactionId, requestId, quoteId',
+        message: 'Missing required parameters: transactionId, requestId, fromChainId, toChainId',
       });
     }
 
     let status;
     if (poll) {
       // Poll until completion
-      status = await pollSquidStatus(transactionId, requestId, quoteId);
+      status = await pollSquidStatus(transactionId, requestId, fromChainId, toChainId, quoteId);
     } else {
       // Get status once
-      status = await getSquidStatus(transactionId, requestId, quoteId);
+      status = await getSquidStatus(transactionId, requestId, fromChainId, toChainId, quoteId);
     }
 
     return {
